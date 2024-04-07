@@ -1,0 +1,4168 @@
+openapi: 3.0.0
+info:
+  title: D Carbn
+  version: v1
+tags:
+  - name: Auth
+  - name: Roles
+  - name: Company
+  - name: Delivery Service Provider
+  - name: Depot
+  - name: Vehicle
+  - name: Journey
+  - name: Stop
+  - name: User Managment
+  - name: Reports
+  - name: Mileage
+paths:
+  /sanctum/csrf-cookie:
+    get:
+      tags:
+        - Auth
+      operationId: Csrf_csrfToken
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+  /v1/auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: Auth_login
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.Login'
+  /v1/auth/logout:
+    post:
+      tags:
+        - Auth
+      operationId: Auth_logout
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/auth/profile:
+    get:
+      tags:
+        - Auth
+      operationId: Auth_profile
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.User'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/auth/register:
+    post:
+      tags:
+        - Auth
+      operationId: Auth_register
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.Register'
+  /v1/companies:
+    get:
+      tags:
+        - Company
+      operationId: Company_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Company'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Company
+      operationId: Company_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Company'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CompanyCreate'
+  /v1/companies/{id}:
+    get:
+      tags:
+        - Company
+      operationId: Company_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Company'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Company
+      operationId: Company_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Company'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CompanyUpdate'
+    delete:
+      tags:
+        - Company
+      operationId: Company_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/delivery-service-providers:
+    get:
+      tags:
+        - Delivery Service Provider
+      operationId: DeliveryServiceProvider_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.DeliveryServiceProvider'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Delivery Service Provider
+      operationId: DeliveryServiceProvider_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.DeliveryServiceProvider'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.DeliveryServiceProviderCreate'
+  /v1/delivery-service-providers/{id}:
+    get:
+      tags:
+        - Delivery Service Provider
+      operationId: DeliveryServiceProvider_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.DeliveryServiceProvider'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Delivery Service Provider
+      operationId: DeliveryServiceProvider_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.DeliveryServiceProvider'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.DeliveryServiceProviderUpdate'
+    delete:
+      tags:
+        - Delivery Service Provider
+      operationId: DeliveryServiceProvider_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/depots:
+    get:
+      tags:
+        - Depot
+      operationId: Depot_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Depot'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Depot
+      operationId: Depot_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Depot'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.DepotCreate'
+  /v1/depots/{id}:
+    get:
+      tags:
+        - Depot
+      operationId: Depot_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Depot'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Depot
+      operationId: Depot_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Depot'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.DepotUpdate'
+    delete:
+      tags:
+        - Depot
+      operationId: Depot_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/journeys:
+    get:
+      tags:
+        - Journey
+      operationId: Journey_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Journey'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Journey
+      operationId: Journey_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Journey'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.JourneyCreate'
+  /v1/journeys/actual-journey-csv-upload:
+    post:
+      tags:
+        - Journey
+      operationId: Journey_actualCsvUpload
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+  /v1/journeys/planned-journey-csv-upload:
+    post:
+      tags:
+        - Journey
+      operationId: Journey_plannedCsvUpload
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+  /v1/journeys/{id}:
+    get:
+      tags:
+        - Journey
+      operationId: Journey_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Journey'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Journey
+      operationId: Journey_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Journey'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.JourneyUpdate'
+    delete:
+      tags:
+        - Journey
+      operationId: Journey_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/mileages:
+    get:
+      tags:
+        - Mileage
+      operationId: Mileage_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Mileage'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Mileage
+      operationId: Mileage_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Mileage'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.Mileage'
+  /v1/mileages/csv-upload:
+    post:
+      tags:
+        - Mileage
+      operationId: Mileage_csvUpload
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+  /v1/mileages/{id}:
+    get:
+      tags:
+        - Mileage
+      operationId: Mileage_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Mileage'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Mileage
+      operationId: Mileage_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Mileage'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.MileageUpdate'
+    delete:
+      tags:
+        - Mileage
+      operationId: Mileage_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/reports:
+    post:
+      tags:
+        - Reports
+      operationId: Report_buildReport
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.Report'
+  /v1/roles:
+    get:
+      tags:
+        - Roles
+      operationId: Role_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Role'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/stops:
+    get:
+      tags:
+        - Stop
+      operationId: Stop_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Stop'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Stop
+      operationId: Stop_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Stop'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.StopCreate'
+  /v1/stops/actual-stop-csv-upload:
+    post:
+      tags:
+        - Stop
+      operationId: Stop_actualCsvUpload
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+  /v1/stops/planned-stop-csv-upload:
+    post:
+      tags:
+        - Stop
+      operationId: Stop_plannedCsvUpload
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+  /v1/stops/{id}:
+    get:
+      tags:
+        - Stop
+      operationId: Stop_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Stop'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Stop
+      operationId: Stop_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Stop'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.StopUpdate'
+    delete:
+      tags:
+        - Stop
+      operationId: Stop_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/users:
+    get:
+      tags:
+        - User Managment
+      operationId: User_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.User'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - User Managment
+      operationId: User_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.User'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UserCreate'
+  /v1/users/{id}:
+    get:
+      tags:
+        - User Managment
+      operationId: User_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.User'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - User Managment
+      operationId: User_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.User'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UserUpdate'
+    delete:
+      tags:
+        - User Managment
+      operationId: User_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+  /v1/vehicles:
+    get:
+      tags:
+        - Vehicle
+      operationId: Vehicle_list
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+        - name: filters
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: array
+              items: {}
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - count
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Models.Vehicle'
+                  count:
+                    type: integer
+                    format: uint32
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    post:
+      tags:
+        - Vehicle
+      operationId: Vehicle_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Vehicle'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.VehicleCreate'
+  /v1/vehicles/csv-upload:
+    post:
+      tags:
+        - Vehicle
+      operationId: Vehicle_csvUpload
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SuccessfullyStartedBackgroundTask'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+  /v1/vehicles/{id}:
+    get:
+      tags:
+        - Vehicle
+      operationId: Vehicle_show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Vehicle'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+    patch:
+      tags:
+        - Vehicle
+      operationId: Vehicle_edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Models.Vehicle'
+                required:
+                  - data
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.VehicleUpdate'
+    delete:
+      tags:
+        - Vehicle
+      operationId: Vehicle_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Deleted'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthenticatedError'
+        '403':
+          description: Access is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.Error'
+components:
+  schemas:
+    Models.Company:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - name
+        - vehicle_end_day_at_depot
+        - main_contact_name
+        - job_title
+        - email
+        - phone_number
+        - address
+        - address_line_1
+        - town_or_city
+        - postcode
+        - county
+        - billing_address
+        - billing_address_line_1
+        - billing_town_or_city
+        - billing_postcode
+        - billing_county
+        - status
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        name:
+          type: string
+        vehicle_end_day_at_depot:
+          type: boolean
+        main_contact_name:
+          type: string
+        job_title:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          format: phone
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        billing_address:
+          type: string
+        billing_address_line_1:
+          type: string
+        billing_town_or_city:
+          type: string
+        billing_postcode:
+          type: string
+        billing_county:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Inactive
+    Models.CompanyCreate:
+      type: object
+      required:
+        - name
+        - vehicle_end_day_at_depot
+        - main_contact_name
+        - job_title
+        - email
+        - phone_number
+        - address
+        - address_line_1
+        - town_or_city
+        - postcode
+        - county
+        - billing_address
+        - billing_address_line_1
+        - billing_town_or_city
+        - billing_postcode
+        - billing_county
+        - status
+      properties:
+        name:
+          type: string
+        vehicle_end_day_at_depot:
+          type: boolean
+        main_contact_name:
+          type: string
+        job_title:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          format: phone
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        billing_address:
+          type: string
+        billing_address_line_1:
+          type: string
+        billing_town_or_city:
+          type: string
+        billing_postcode:
+          type: string
+        billing_county:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Inactive
+    Models.CompanyUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        vehicle_end_day_at_depot:
+          type: boolean
+        main_contact_name:
+          type: string
+        job_title:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          format: phone
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        billing_address:
+          type: string
+        billing_address_line_1:
+          type: string
+        billing_town_or_city:
+          type: string
+        billing_postcode:
+          type: string
+        billing_county:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Inactive
+    Models.Deleted:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          enum:
+            - Successfully deleted
+    Models.DeliveryServiceProvider:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - company
+        - name
+        - main_contact_name
+        - job_title
+        - email
+        - phone_number
+        - address
+        - address_line_1
+        - town_or_city
+        - postcode
+        - county
+        - billing_address
+        - billing_address_line_1
+        - billing_town_or_city
+        - billing_postcode
+        - billing_county
+        - status
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        company:
+          allOf:
+            - $ref: '#/components/schemas/Models.Company'
+          readOnly: true
+        name:
+          type: string
+        main_contact_name:
+          type: string
+        job_title:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          format: phone
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        billing_address:
+          type: string
+        billing_address_line_1:
+          type: string
+        billing_town_or_city:
+          type: string
+        billing_postcode:
+          type: string
+        billing_county:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Inactive
+    Models.DeliveryServiceProviderCreate:
+      type: object
+      required:
+        - name
+        - company_id
+        - main_contact_name
+        - job_title
+        - email
+        - phone_number
+        - address
+        - address_line_1
+        - town_or_city
+        - postcode
+        - county
+        - billing_address
+        - billing_address_line_1
+        - billing_town_or_city
+        - billing_postcode
+        - billing_county
+        - status
+      properties:
+        name:
+          type: string
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        main_contact_name:
+          type: string
+        job_title:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          format: phone
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        billing_address:
+          type: string
+        billing_address_line_1:
+          type: string
+        billing_town_or_city:
+          type: string
+        billing_postcode:
+          type: string
+        billing_county:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Inactive
+    Models.DeliveryServiceProviderUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        main_contact_name:
+          type: string
+        job_title:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          format: phone
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        billing_address:
+          type: string
+        billing_address_line_1:
+          type: string
+        billing_town_or_city:
+          type: string
+        billing_postcode:
+          type: string
+        billing_county:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Inactive
+    Models.Depot:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - name
+        - company
+        - address
+        - address_line_1
+        - town_or_city
+        - postcode
+        - county
+        - longitude
+        - latitude
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        name:
+          type: string
+        company:
+          allOf:
+            - $ref: '#/components/schemas/Models.Company'
+          readOnly: true
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        longitude:
+          type: string
+          format: number
+        latitude:
+          type: string
+          format: number
+    Models.DepotCreate:
+      type: object
+      required:
+        - name
+        - company_id
+        - address
+        - address_line_1
+        - town_or_city
+        - postcode
+        - county
+        - longitude
+        - latitude
+      properties:
+        name:
+          type: string
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        longitude:
+          type: string
+          format: number
+        latitude:
+          type: string
+          format: number
+    Models.DepotUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        address:
+          type: string
+        address_line_1:
+          type: string
+        town_or_city:
+          type: string
+        postcode:
+          type: string
+        county:
+          type: string
+        longitude:
+          type: string
+          format: number
+        latitude:
+          type: string
+          format: number
+    Models.Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    Models.Journey:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - date
+        - planned_or_actual
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        start_postcode:
+          type: string
+        end_postcode:
+          type: string
+        date:
+          type: string
+          format: date
+        total_number_of_collections:
+          type: integer
+          format: uint32
+        total_parcels_collected:
+          type: integer
+          format: uint32
+        total_number_of_deliveries:
+          type: integer
+          format: uint32
+        total_undelivered_parcels:
+          type: integer
+          format: uint32
+        total_number_of_stops:
+          type: integer
+          format: uint32
+        total_route_time_mins:
+          type: integer
+          format: uint32
+        total_route_miles:
+          type: number
+          format: double
+        parcel_size:
+          type: number
+          format: double
+        parcel_weight:
+          type: number
+          format: double
+        country:
+          type: string
+        clients_client:
+          type: string
+        start_mileage:
+          type: number
+          format: double
+        end_mileage:
+          type: number
+          format: double
+        planned_or_actual:
+          type: string
+          enum:
+            - Planned
+            - Actual
+            - Actual
+        client_depot:
+          allOf:
+            - $ref: '#/components/schemas/Models.Depot'
+          readOnly: true
+        vehicle:
+          allOf:
+            - $ref: '#/components/schemas/Models.Vehicle'
+          readOnly: true
+        total_co2_emissions:
+          type: integer
+          format: uint32
+          readOnly: true
+        total_co2_per_parcel:
+          type: integer
+          format: uint32
+          readOnly: true
+        total_co2_per_stop:
+          type: integer
+          format: uint32
+          readOnly: true
+    Models.JourneyCreate:
+      type: object
+      required:
+        - vehicle_id
+        - date
+        - planned_or_actual
+      properties:
+        client_depot_id:
+          $ref: '#/components/schemas/uuid'
+        vehicle_id:
+          $ref: '#/components/schemas/uuid'
+        start_postcode:
+          type: string
+        end_postcode:
+          type: string
+        date:
+          type: string
+          format: date
+        total_number_of_collections:
+          type: integer
+          format: uint32
+        total_parcels_collected:
+          type: integer
+          format: uint32
+        total_number_of_deliveries:
+          type: integer
+          format: uint32
+        total_undelivered_parcels:
+          type: integer
+          format: uint32
+        total_number_of_stops:
+          type: integer
+          format: uint32
+        total_route_time_mins:
+          type: integer
+          format: uint32
+        total_route_miles:
+          type: number
+          format: double
+        parcel_size:
+          type: number
+          format: double
+        parcel_weight:
+          type: number
+          format: double
+        country:
+          type: string
+        clients_client:
+          type: string
+        start_mileage:
+          type: number
+          format: double
+        end_mileage:
+          type: number
+          format: double
+        planned_or_actual:
+          type: string
+          enum:
+            - Planned
+            - Actual
+    Models.JourneyUpdate:
+      type: object
+      properties:
+        client_depot_id:
+          $ref: '#/components/schemas/uuid'
+        vehicle_id:
+          $ref: '#/components/schemas/uuid'
+        start_postcode:
+          type: string
+        end_postcode:
+          type: string
+        date:
+          type: string
+          format: date
+        total_number_of_collections:
+          type: integer
+          format: uint32
+        total_parcels_collected:
+          type: integer
+          format: uint32
+        total_number_of_deliveries:
+          type: integer
+          format: uint32
+        total_undelivered_parcels:
+          type: integer
+          format: uint32
+        total_number_of_stops:
+          type: integer
+          format: uint32
+        total_route_time_mins:
+          type: integer
+          format: uint32
+        total_route_miles:
+          type: number
+          format: double
+        parcel_size:
+          type: number
+          format: double
+        parcel_weight:
+          type: number
+          format: double
+        country:
+          type: string
+        clients_client:
+          type: string
+        start_mileage:
+          type: number
+          format: double
+        end_mileage:
+          type: number
+          format: double
+        planned_or_actual:
+          type: string
+          enum:
+            - Planned
+            - Actual
+            - Actual
+    Models.Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          $ref: '#/components/schemas/password'
+    Models.Mileage:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - vehicle_id
+        - depot_id
+        - date
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        vehicle_id:
+          $ref: '#/components/schemas/uuid'
+        depot_id:
+          $ref: '#/components/schemas/uuid'
+        date:
+          type: string
+          format: date
+    Models.MileageUpdate:
+      type: object
+      properties:
+        vehicle_id:
+          $ref: '#/components/schemas/uuid'
+        depot_id:
+          $ref: '#/components/schemas/uuid'
+        date:
+          type: string
+          format: date
+    Models.MotStatus:
+      type: string
+      enum:
+        - No details held by DVLA
+        - No results returned
+        - Not valid
+        - Valid
+    Models.NotFoundError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          enum:
+            - Not found
+    Models.PermissionOption:
+      type: string
+      enum:
+        - manageAll:users
+        - showAll:users
+        - manageRelated:users
+        - showRelated:users
+        - manageAll:companies
+        - showAll:companies
+        - manageRelated:companies
+        - showRelated:companies
+        - manageAll:deliveryServiceProviders
+        - showAll:deliveryServiceProviders
+        - manageRelated:deliveryServiceProviders
+        - showRelated:deliveryServiceProviders
+        - manageAll:depots
+        - showAll:depots
+        - manageRelated:depots
+        - showRelated:depots
+        - manageAll:journeys
+        - showAll:journeys
+        - manageRelated:journeys
+        - showRelated:journeys
+        - manageAll:mileages
+        - showAll:mileages
+        - manageRelated:mileages
+        - showRelated:mileages
+        - manageAll:repots
+        - showAll:repots
+        - manageRelated:repots
+        - showRelated:repots
+        - manageAll:stops
+        - showAll:stops
+        - manageRelated:stops
+        - showRelated:stops
+        - manageAll:vehicles
+        - showAll:vehicles
+        - manageRelated:vehicles
+        - showRelated:vehicles
+    Models.Register:
+      type: object
+      required:
+        - email
+        - first_name
+        - last_name
+        - password
+        - password_comfirmation
+      properties:
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password:
+          $ref: '#/components/schemas/password'
+        password_comfirmation:
+          $ref: '#/components/schemas/password'
+    Models.Report:
+      type: object
+      required:
+        - report_format
+        - email
+        - report_type
+        - start_date
+        - end_date
+        - service_provider_id
+        - company_id
+        - sub_client
+        - depot_id
+      properties:
+        report_format:
+          $ref: '#/components/schemas/Models.ReportFormat'
+        email:
+          type: string
+          format: email
+        report_type:
+          $ref: '#/components/schemas/Models.ReportType'
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        service_provider_id:
+          $ref: '#/components/schemas/uuid'
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        sub_client:
+          $ref: '#/components/schemas/uuid'
+        depot_id:
+          $ref: '#/components/schemas/uuid'
+    Models.ReportFormat:
+      type: string
+      enum:
+        - Pdf
+        - Csv
+    Models.ReportType:
+      type: string
+      enum:
+        - TotalCo2Emissions
+    Models.Role:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - name
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        name:
+          $ref: '#/components/schemas/Models.RoleOption'
+    Models.RoleOption:
+      type: string
+      enum:
+        - admin
+        - client
+        - delivery_service_provider
+    Models.Stop:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - journey_id
+        - post_tag_latitude
+        - post_tag_longitude
+        - difference_in_meters
+        - planned_or_actual
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        journey_id:
+          $ref: '#/components/schemas/uuid'
+        postcode:
+          type: string
+        geolocation_latitude:
+          type: number
+          format: double
+        geolocation_longitude:
+          type: number
+          format: double
+        post_tag_latitude:
+          type: number
+          format: double
+        post_tag_longitude:
+          type: number
+          format: double
+        difference_in_meters:
+          type: integer
+          format: uint32
+        parcels_delivered:
+          type: integer
+          format: uint32
+        parcels_collected:
+          type: integer
+          format: uint32
+        clients_client:
+          type: string
+        sequence:
+          type: integer
+          format: uint32
+        date_time:
+          type: string
+          format: date-time
+        planned_or_actual:
+          type: string
+          enum:
+            - Planned
+            - Actual
+            - Actual
+    Models.StopCreate:
+      type: object
+      required:
+        - journey_id
+        - post_tag_latitude
+        - post_tag_longitude
+        - difference_in_meters
+        - planned_or_actual
+      properties:
+        journey_id:
+          $ref: '#/components/schemas/uuid'
+        postcode:
+          type: string
+        geolocation_latitude:
+          type: number
+          format: double
+        geolocation_longitude:
+          type: number
+          format: double
+        post_tag_latitude:
+          type: number
+          format: double
+        post_tag_longitude:
+          type: number
+          format: double
+        difference_in_meters:
+          type: integer
+          format: uint32
+        parcels_delivered:
+          type: integer
+          format: uint32
+        parcels_collected:
+          type: integer
+          format: uint32
+        clients_client:
+          type: string
+        sequence:
+          type: integer
+          format: uint32
+        date_time:
+          type: string
+          format: date-time
+        planned_or_actual:
+          type: string
+          enum:
+            - Planned
+            - Actual
+    Models.StopUpdate:
+      type: object
+      properties:
+        journey_id:
+          $ref: '#/components/schemas/uuid'
+        postcode:
+          type: string
+        geolocation_latitude:
+          type: number
+          format: double
+        geolocation_longitude:
+          type: number
+          format: double
+        post_tag_latitude:
+          type: number
+          format: double
+        post_tag_longitude:
+          type: number
+          format: double
+        difference_in_meters:
+          type: integer
+          format: uint32
+        parcels_delivered:
+          type: integer
+          format: uint32
+        parcels_collected:
+          type: integer
+          format: uint32
+        clients_client:
+          type: string
+        sequence:
+          type: integer
+          format: uint32
+        date_time:
+          type: string
+          format: date-time
+        planned_or_actual:
+          type: string
+          enum:
+            - Planned
+            - Actual
+            - Actual
+    Models.SuccessfullyStartedBackgroundTask:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    Models.TaxStatus:
+      type: string
+      enum:
+        - Not Taxed for on Road Use
+        - SORN
+        - Taxed
+        - Untaxed
+    Models.UnauthenticatedError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    Models.UnauthorizedError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    Models.User:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - email
+        - first_name
+        - last_name
+        - role
+        - email_verified_at
+        - permissions
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password_reset_on_login:
+          type: boolean
+        company:
+          allOf:
+            - $ref: '#/components/schemas/Models.Company'
+          readOnly: true
+        delivery_service_provider:
+          allOf:
+            - $ref: '#/components/schemas/Models.DeliveryServiceProvider'
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/Models.RoleOption'
+        email_verified_at:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PermissionOption'
+          readOnly: true
+    Models.UserCreate:
+      type: object
+      required:
+        - email
+        - first_name
+        - last_name
+        - role
+        - password
+        - password_confirmation
+      properties:
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password_reset_on_login:
+          type: boolean
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        delivery_service_provider_id:
+          $ref: '#/components/schemas/uuid'
+        role:
+          $ref: '#/components/schemas/Models.RoleOption'
+        password:
+          type: string
+          format: password
+        password_confirmation:
+          type: string
+          format: password
+    Models.UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password_reset_on_login:
+          type: boolean
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        delivery_service_provider_id:
+          $ref: '#/components/schemas/uuid'
+        role:
+          $ref: '#/components/schemas/Models.RoleOption'
+        password:
+          type: string
+          format: password
+        password_confirmation:
+          type: string
+          format: password
+    Models.ValidationError:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Models.Vehicle:
+      type: object
+      required:
+        - created_at
+        - updated_at
+        - id
+        - registration_reference
+        - vehicle_type
+        - country_text
+        - registered
+        - company
+        - delivery_service_provider
+        - depot
+        - dvla_data_retrieved
+        - dvla_data_error
+        - make
+        - fuel_type
+        - year_of_manufacture
+        - month_of_first_registration
+        - month_of_first_dvla_registration
+        - engine_capacity
+        - revenue_weight
+        - co2_emission_g_per_km
+        - colour
+        - approval_type
+        - tax_status
+        - mot_status
+        - euro_status
+        - real_driving_emissions
+        - date_of_last_v5c_issued
+        - wheel_plan
+        - tax_due_date
+        - mot_expiry_date
+        - marked_for_export
+        - additional_rate_of_tax_end_date
+        - automated_vehicle
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          readOnly: true
+        registration_reference:
+          type: string
+        vehicle_type:
+          type: string
+          enum:
+            - Car
+            - Sit on Scooter
+            - Bike
+            - Motorbike
+            - Van
+            - e-bike
+            - Lorry
+            - Solar Powered Vehicle
+            - Small Van
+            - 3.5t Luton Van
+            - Cargo Bike
+            - Walker
+            - Pedal Assisted Cargo Bike
+            - Medium Van
+            - Large Van
+            - 7.5t Truck
+            - 26t Truck
+            - Cargo
+            - Sit on eScooter
+            - Cargo Trike
+            - PushBike
+            - Pedal Cycle
+            - Car Derived Van
+            - Micro Van
+            - 18t Truck
+            - Electric Bike/e-bike
+            - Others
+            - 12t Truck
+        vehicle_model:
+          type: string
+        vehicle_model_ext:
+          type: string
+        gear_shift:
+          type: string
+        driving_wheel:
+          type: string
+        country_text:
+          type: string
+        registered:
+          type: boolean
+        company:
+          allOf:
+            - $ref: '#/components/schemas/Models.Company'
+          readOnly: true
+        delivery_service_provider:
+          allOf:
+            - $ref: '#/components/schemas/Models.DeliveryServiceProvider'
+          readOnly: true
+        depot:
+          allOf:
+            - $ref: '#/components/schemas/Models.Depot'
+          readOnly: true
+        dvla_data_retrieved:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        dvla_data_error:
+          type: string
+          nullable: true
+          readOnly: true
+        make:
+          type: string
+          nullable: true
+          readOnly: true
+        fuel_type:
+          type: string
+          nullable: true
+          readOnly: true
+        year_of_manufacture:
+          type: integer
+          format: uint32
+          nullable: true
+          readOnly: true
+        month_of_first_registration:
+          type: string
+          nullable: true
+          readOnly: true
+        month_of_first_dvla_registration:
+          type: string
+          nullable: true
+          readOnly: true
+        engine_capacity:
+          type: integer
+          format: int32
+          nullable: true
+          readOnly: true
+        revenue_weight:
+          type: integer
+          format: int32
+          nullable: true
+          readOnly: true
+        co2_emission_g_per_km:
+          type: integer
+          format: int32
+          nullable: true
+          readOnly: true
+        colour:
+          type: string
+          nullable: true
+          readOnly: true
+        approval_type:
+          type: string
+          nullable: true
+          readOnly: true
+        tax_status:
+          oneOf:
+            - $ref: '#/components/schemas/Models.TaxStatus'
+          nullable: true
+          readOnly: true
+        mot_status:
+          oneOf:
+            - $ref: '#/components/schemas/Models.MotStatus'
+          nullable: true
+          readOnly: true
+        euro_status:
+          type: string
+          nullable: true
+          readOnly: true
+        real_driving_emissions:
+          type: string
+          nullable: true
+          readOnly: true
+        date_of_last_v5c_issued:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        wheel_plan:
+          type: string
+          nullable: true
+          readOnly: true
+        tax_due_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        mot_expiry_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        marked_for_export:
+          type: boolean
+          nullable: true
+          readOnly: true
+        additional_rate_of_tax_end_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        automated_vehicle:
+          type: boolean
+          nullable: true
+          readOnly: true
+    Models.VehicleCreate:
+      type: object
+      required:
+        - registration_reference
+        - company_id
+        - vehicle_type
+        - country_text
+        - registered
+      properties:
+        registration_reference:
+          type: string
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        delivery_service_provider_id:
+          $ref: '#/components/schemas/uuid'
+        depot_id:
+          $ref: '#/components/schemas/uuid'
+        vehicle_type:
+          type: string
+          enum:
+            - Car
+            - Sit on Scooter
+            - Bike
+            - Motorbike
+            - Van
+            - e-bike
+            - Lorry
+            - Solar Powered Vehicle
+            - Small Van
+            - 3.5t Luton Van
+            - Cargo Bike
+            - Walker
+            - Pedal Assisted Cargo Bike
+            - Medium Van
+            - Large Van
+            - 7.5t Truck
+            - 26t Truck
+            - Cargo
+            - Sit on eScooter
+            - Cargo Trike
+            - PushBike
+            - Pedal Cycle
+            - Car Derived Van
+            - Micro Van
+            - 18t Truck
+            - Electric Bike/e-bike
+            - Others
+            - 12t Truck
+        vehicle_model:
+          type: string
+        vehicle_model_ext:
+          type: string
+        gear_shift:
+          type: string
+        driving_wheel:
+          type: string
+        country_text:
+          type: string
+        registered:
+          type: boolean
+    Models.VehicleUpdate:
+      type: object
+      properties:
+        registration_reference:
+          type: string
+        company_id:
+          $ref: '#/components/schemas/uuid'
+        delivery_service_provider_id:
+          $ref: '#/components/schemas/uuid'
+        depot_id:
+          $ref: '#/components/schemas/uuid'
+        vehicle_type:
+          type: string
+          enum:
+            - Car
+            - Sit on Scooter
+            - Bike
+            - Motorbike
+            - Van
+            - e-bike
+            - Lorry
+            - Solar Powered Vehicle
+            - Small Van
+            - 3.5t Luton Van
+            - Cargo Bike
+            - Walker
+            - Pedal Assisted Cargo Bike
+            - Medium Van
+            - Large Van
+            - 7.5t Truck
+            - 26t Truck
+            - Cargo
+            - Sit on eScooter
+            - Cargo Trike
+            - PushBike
+            - Pedal Cycle
+            - Car Derived Van
+            - Micro Van
+            - 18t Truck
+            - Electric Bike/e-bike
+            - Others
+            - 12t Truck
+        vehicle_model:
+          type: string
+        vehicle_model_ext:
+          type: string
+        gear_shift:
+          type: string
+        driving_wheel:
+          type: string
+        country_text:
+          type: string
+        registered:
+          type: boolean
+    Versions:
+      type: string
+      enum:
+        - v1
+    password:
+      type: string
+      format: password
+    uuid:
+      type: string
+      format: uuid

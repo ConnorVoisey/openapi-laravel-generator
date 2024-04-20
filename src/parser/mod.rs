@@ -1,11 +1,15 @@
 use anyhow::Result;
 use askama::Template;
+use colored::Colorize;
 use openapiv3::{OpenAPI, ReferenceOr, RequestBody, Schema, Type};
 use std::fs::File;
 use std::io::prelude::*;
 
 use crate::templates::{Field, RequestTemplate};
 
+pub fn parse_openapi(input: &String) -> Result<OpenAPI> {
+    Ok(serde_yaml::from_str(input)?)
+}
 fn schema_to_request_template<'a>(
     openapi: &'a OpenAPI,
     class_name: &'a String,
@@ -94,7 +98,9 @@ fn schema_type_to_fields<'a>(openapi: &'a OpenAPI, schema_type: &'a Type) -> Vec
                         match str.format {
                             openapiv3::VariantOrUnknownOrEmpty::Item(item) => match item {
                                 openapiv3::StringFormat::Date => {}
-                                openapiv3::StringFormat::DateTime => rules.push(r#"'date_format:Y-m-d\TH:i:s\Z', // UTC datetime format"#),
+                                openapiv3::StringFormat::DateTime => rules.push(
+                                    r#"'date_format:Y-m-d\TH:i:s\Z', // UTC datetime format"#,
+                                ),
                                 openapiv3::StringFormat::Password => {}
                                 openapiv3::StringFormat::Byte => {}
                                 openapiv3::StringFormat::Binary => rules.push("'file'"),
@@ -103,7 +109,10 @@ fn schema_type_to_fields<'a>(openapi: &'a OpenAPI, schema_type: &'a Type) -> Vec
                                 match custom_format.as_str() {
                                     "email" => rules.push("'email'"),
                                     _ => println!(
-                                        "unknown formatting rule doesn't do anything: {custom_format}"
+                                        "{:5}{}: {}",
+                                        "",
+                                        "unknown formatting rule doesn't do anything".yellow(),
+                                        custom_format
                                     ),
                                 }
                             }
